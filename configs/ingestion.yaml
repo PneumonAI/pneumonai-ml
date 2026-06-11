@@ -1,0 +1,13 @@
+dataset:
+  name: rsna_pneumonia_2018
+  root: data/raw/rsna_pneumonia_2018
+
+inputs:
+  train_images: train/images
+  labels: source_metadata/stage_2_train_labels.csv
+  classes: source_metadata/stage_2_detailed_class_info.csv
+
+outputs:
+  images: data/metadata/images.csv
+  bounding_boxes: data/metadata/bounding_boxes.csv
+

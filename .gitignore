@@ -1,0 +1,12 @@
+# Local datasets and generated data artifacts
+/data/raw/
+/data/metadata/
+/data/splits/
+
+# Python tooling
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ipynb_checkpoints/
+*.egg-info/
