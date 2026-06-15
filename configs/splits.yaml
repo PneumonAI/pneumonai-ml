@@ -1,0 +1,14 @@
+seed: 42
+
+input:
+  images: data/metadata/images.csv
+
+ratios:
+  train: 0.70
+  validation: 0.15
+  test: 0.15
+
+outputs:
+  train: data/splits/train.csv
+  validation: data/splits/validation.csv
+  test: data/splits/test.csv
