@@ -49,6 +49,44 @@ Run the automated data-pipeline tests with:
 python -m pytest tests/data -q
 ```
 
+## Preprocessing Contract
+
+The versioned MVP preprocessing specification is stored in
+`configs/preprocessing.yaml`. It defines the exact transformation that both
+Python training and C++ inference must reproduce.
+
+```text
+DICOM pixel data
+  -> require one two-dimensional grayscale image
+  -> invert pixels when PhotometricInterpretation is MONOCHROME1
+  -> min-max scale intensities to [0, 1]
+  -> resize directly to 224 x 224 with bilinear interpolation
+  -> repeat grayscale into three channels
+  -> apply ImageNet channel mean and standard deviation
+  -> return a float32 tensor in CHW layout
+```
+
+The resulting model input contract is:
+
+```text
+shape:   [3, 224, 224]
+layout:  CHW
+dtype:   float32
+mean:    [0.485, 0.456, 0.406]
+std:     [0.229, 0.224, 0.225]
+version: 1.0
+```
+
+Direct resizing does not preserve the original aspect ratio. This is an
+intentional MVP simplification that keeps Python and C++ behavior easy to
+reproduce. Changing image dimensions, interpolation, intensity scaling, or
+normalization creates a new preprocessing version and requires model
+reevaluation.
+
+Raw DICOM files are never modified. Preprocessing occurs in memory when an
+image is loaded. Random rotation, flipping, cropping, and other training-only
+augmentation are not part of this shared inference contract.
+
 ## Dataset
 
 The selected MVP dataset is the

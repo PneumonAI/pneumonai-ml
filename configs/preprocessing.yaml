@@ -1,0 +1,26 @@
+version: "1.0"
+
+input:
+  format: dicom
+  dimensions: 2
+
+intensity:
+  invert_monochrome1: true
+  scaling: min_max
+  output_min: 0.0
+  output_max: 1.0
+
+image:
+  width: 224
+  height: 224
+  channels: 3
+  resize: bilinear
+  preserve_aspect_ratio: false
+
+tensor:
+  layout: CHW
+  dtype: float32
+
+normalization:
+  mean: [0.485, 0.456, 0.406]
+  std: [0.229, 0.224, 0.225]
