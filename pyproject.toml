@@ -16,6 +16,7 @@ dependencies = [
     "matplotlib>=3.9,<4",
     "pydicom>=3,<4",
     "PyYAML>=6,<7",
+    "torchvision>=0.19,<1",
 ]
 
 [project.optional-dependencies]

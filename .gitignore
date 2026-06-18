@@ -2,7 +2,7 @@
 /data/raw/
 /data/metadata/
 /data/splits/
-
+/checkpoints
 # Python tooling
 __pycache__/
 *.py[cod]
