@@ -1,0 +1,10 @@
+arch: resnet18
+num_classes: 1
+checkpoint: checkpoints/resnet18_lr0.001_best.pt
+val_loss: 0.3749
+val_accuracy: 0.8356
+test_loss: 0.3568
+test_accuracy: 0.8481
+training_epochs: 5
+lr: 0.001
+seed: 42
