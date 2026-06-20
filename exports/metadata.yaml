@@ -1,0 +1,17 @@
+checksum_sha256: d25dab3e004fdac0428620b52f9c5fd31b217bbb60a0540a20d664845457ee24
+classes:
+  0: normal
+  1: pneumonia
+input_dtype: float32
+input_shape:
+- 1
+- 3
+- 224
+- 224
+model_version: resnet18
+num_classes: 1
+output: "raw logit \u2014 apply sigmoid for probability"
+preprocessing_version: '1.0'
+test_accuracy: 0.8481
+threshold: 0.5
+val_accuracy: 0.8356
