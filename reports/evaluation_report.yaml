@@ -1,0 +1,14 @@
+checkpoint: checkpoints/resnet18_lr0.001_best.pt
+confusion_matrix:
+  fn: 231
+  fp: 569
+  tn: 2532
+  tp: 671
+f1: 0.6265172735760971
+model: resnet18
+precision: 0.5411290322580645
+recall: 0.7439024390243902
+sensitivity: 0.7439024390243902
+specificity: 0.8165108029667849
+test_auc: 0.8740528589947739
+threshold: 0.30780404806137085

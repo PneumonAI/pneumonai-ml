@@ -8,3 +8,9 @@ test_accuracy: 0.8481
 training_epochs: 5
 lr: 0.001
 seed: 42
+threshold: 0.3078
+test_auc: 0.8741
+sensitivity: 0.7439
+specificity: 0.8165
+precision: 0.5411
+f1: 0.6265

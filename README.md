@@ -19,8 +19,10 @@ medical device.
 
 ```text
 configs/       Reproducible workflow configuration
-data/          Local source data and generated artifacts
-notebooks/     Exploration and assumption checks
+data/          Local source data and generated artifacts (gitignored)
+exports/       TorchScript model artifact for C++ backend
+notebooks/     Exploration, experiments, and evaluation reports
+reports/       Evaluation metrics and threshold selection output
 scripts/       Thin command-line entry points
 src/           Reusable production Python package
 tests/         Automated behavior and validation tests
@@ -30,6 +32,68 @@ Notebooks are used to understand data and communicate findings. Reusable
 parsing, validation, ingestion, preprocessing, training, and evaluation logic
 belongs under `src/`. Scripts should only parse command-line inputs and call
 those reusable modules.
+
+### Scripts
+
+```text
+scripts/
+├── ingest_rsna.py                  Build canonical metadata from RSNA source files
+├── create_splits.py                Generate deterministic train/validation/test splits
+├── generate_preprocessing_fixtures.py  Save reference tensors for contract verification
+├── train.py                        Train a model from a config file
+├── evaluate.py                     Run loss and accuracy on the test set
+└── export.py                       Export the release checkpoint as TorchScript
+```
+
+### Notebooks
+
+```text
+notebooks/
+├── 01_rsna_data_exploration.ipynb  RSNA dataset structure, label distribution, DICOM sanity checks
+├── 02_train_experiments.ipynb      ResNet18/34 training experiments on Kaggle GPU
+└── 03_evaluation_report.ipynb      Threshold selection on val set, full metric report on test set
+```
+
+### Source Package
+
+```text
+src/pneumonai/
+├── data/
+│   ├── rsna.py         Maps RSNA tables to canonical records
+│   ├── schema.py       Canonical data types and field definitions
+│   ├── validation.py   DICOM readability and bounding box geometry checks
+│   ├── ingest.py       Writes canonical CSV files and ingestion report
+│   └── splits.py       Deterministic stratified train/validation/test split logic
+├── preprocessing/
+│   ├── specification.py  Loads and validates preprocessing config
+│   └── transform.py      DICOM → float32 CHW tensor pipeline
+└── training/
+    ├── dataset.py      ChestXrayDataset — lazy DICOM loading from split CSVs
+    ├── model.py        build_model — pretrained ResNet with replaced fc layer
+    └── trainer.py      train_one_epoch and validate loop functions
+```
+
+### Configs
+
+```text
+configs/
+├── ingestion.yaml       RSNA source paths and ingestion settings
+├── splits.yaml          Split ratios and random seed
+├── preprocessing.yaml   Versioned preprocessing contract (shared by Python and C++)
+├── training.yaml        Training hyperparameters and paths
+└── model_release.yaml   Selected model checkpoint, metrics, and threshold
+```
+
+### Exports
+
+```text
+exports/
+├── model.pt              TorchScript model for C++ libtorch inference
+├── metadata.yaml         Integration contract (input shape, dtype, threshold, classes)
+├── checksum.sha256       SHA256 integrity verification
+├── reference_input.npy   Dummy input tensor for parity testing
+└── reference_output.npy  Reference logit output for parity testing
+```
 
 ## Development Setup
 
