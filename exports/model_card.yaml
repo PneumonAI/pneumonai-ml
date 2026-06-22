@@ -1,0 +1,89 @@
+model:
+  name: PneumonAI Baseline Classifier
+  architecture: ResNet18
+  pretrained_backbone: ImageNet (IMAGENET1K_V1)
+  num_classes: 1
+  output: binary — pneumonia vs. normal
+  torchscript_artifact: model.pt
+  preprocessing_version: "1.0"
+  training_date: "2026-06"
+
+intended_use:
+  purpose: Screening assistance — flags chest X-rays likely showing pneumonia-associated
+    lung opacity for follow-up review.
+  intended_users: Medical professionals using it as a decision-support tool.
+  not_intended_for:
+    - Clinical diagnosis without physician review
+    - Pediatric patients (not represented in training data)
+    - Non-pneumonia pathology detection
+    - Any regulatory or clinical deployment without independent validation
+
+training:
+  dataset: RSNA Pneumonia Detection Challenge 2018
+  dataset_source: https://www.rsna.org/education/ai-resources-and-training/ai-image-challenge/rsna-pneumonia-detection-challenge-2018
+  total_images: 26684
+  split_seed: 42
+  approximate_split:
+    train: "~18700 images (70%)"
+    validation: "~4000 images (15%)"
+    test: "4003 images (15%)"
+  image_format: DICOM (grayscale, 1024x1024 original resolution)
+  labels:
+    0: normal
+    1: pneumonia (lung opacity present)
+  hyperparameters:
+    optimizer: Adam
+    learning_rate: 0.001
+    batch_size: 32
+    epochs: 5
+
+confidence_semantics:
+  definition: sigmoid(logit) — always the model's probability that the image shows pneumonia
+  range: 0.0 to 1.0
+  threshold: 0.3078
+  threshold_selection: Youden's J on validation set (maximizes sensitivity + specificity)
+  label_rule: "label=pneumonia if confidence >= 0.3078, else label=normal"
+  warning: Confidence is NOT confidence in the predicted class. Do not invert it
+    for normal predictions. Label the field "Pneumonia probability" in any UI —
+    never "certainty" or "diagnostic confidence".
+
+evaluation:
+  dataset: held-out test set (4003 images, never used during training or threshold selection)
+  metrics:
+    auc: 0.8741
+    sensitivity_recall: 0.7439
+    specificity: 0.8165
+    precision: 0.5411
+    f1: 0.6265
+    accuracy: 0.8481
+    threshold_used: 0.3078
+  confusion_matrix:
+    tp: 671
+    tn: 2532
+    fp: 569
+    fn: 231
+  note: FN=231 means 231 real pneumonia cases were not flagged. This is the primary
+    failure risk for a screening tool.
+
+limitations:
+  - Trained on a single US-based dataset; may underperform on equipment or patient
+    populations not represented in RSNA 2018.
+  - Images resized directly to 224x224 without aspect ratio preservation; fine
+    lung detail at original resolution is lost.
+  - No subgroup analysis by age, sex, comorbidity, or imaging equipment.
+  - Precision of 54% means roughly half of pneumonia flags are false positives at
+    this threshold.
+  - Not validated on pediatric chest X-rays.
+  - Does not detect pathologies other than pneumonia-associated lung opacity.
+
+bias_risks:
+  - RSNA 2018 dataset reflects US hospital demographics and equipment; geographic
+    and demographic bias is unquantified.
+  - Class imbalance in source data may affect calibration on populations with
+    different pneumonia prevalence.
+
+artifact_integrity:
+  checksum_file: checksum.sha256
+  algorithm: SHA256
+  reference_input: reference_input.npy
+  reference_output: reference_output.npy
