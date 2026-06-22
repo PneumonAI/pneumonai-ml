@@ -10,8 +10,26 @@ input_shape:
 - 224
 model_version: resnet18
 num_classes: 1
-output: "raw logit \u2014 apply sigmoid for probability"
+output: raw logit \u2014 apply sigmoid to get pneumonia probability in [0, 1]
 preprocessing_version: '1.0'
+threshold: 0.3078
+confidence_semantics:
+  definition: sigmoid(logit) \u2014 always the model's probability that the image shows pneumonia
+  range: 0.0 to 1.0
+  label_rule: label=pneumonia if confidence >= threshold, else label=normal
+  examples:
+    - confidence: 0.72
+      threshold: 0.3078
+      label: pneumonia
+    - confidence: 0.15
+      threshold: 0.3078
+      label: normal
+    - confidence: 0.31
+      threshold: 0.3078
+      label: pneumonia
+  disclaimer: confidence is model output probability, not clinical certainty
 test_accuracy: 0.8481
-threshold: 0.5
+test_auc: 0.8741
+sensitivity: 0.7439
+specificity: 0.8165
 val_accuracy: 0.8356
