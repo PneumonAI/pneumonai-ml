@@ -17,6 +17,8 @@ dependencies = [
     "pydicom>=3,<4",
     "PyYAML>=6,<7",
     "torchvision>=0.19,<1",
+    "grad-cam>=1.5,<2",
+    "opencv-python>=4.9,<5",
 ]
 
 [project.optional-dependencies]

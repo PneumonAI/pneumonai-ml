@@ -12,6 +12,24 @@ model_version: resnet18
 num_classes: 1
 output: raw logit \u2014 apply sigmoid to get pneumonia probability in [0, 1]
 preprocessing_version: '1.0'
+preprocessing:
+  input_format: dicom
+  intensity_scaling: min_max
+  intensity_range: [0.0, 1.0]
+  invert_monochrome1: true
+  resize: [224, 224]
+  resize_interpolation: bilinear
+  preserve_aspect_ratio: false
+  grayscale_to_rgb: replicate_channel
+  tensor_layout: CHW
+  normalization_mean: [0.485, 0.456, 0.406]
+  normalization_std: [0.229, 0.224, 0.225]
+explainability:
+  method: Grad-CAM
+  target_layer: layer4
+  computed_by: python_ml_service
+  note: Grad-CAM is not computed in C++/libtorch. The Python ML service runs inference
+    and heatmap generation together. C++ backend receives the heatmap as a PNG overlay.
 threshold: 0.3078
 confidence_semantics:
   definition: sigmoid(logit) \u2014 always the model's probability that the image shows pneumonia
