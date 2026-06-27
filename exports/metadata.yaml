@@ -1,38 +1,45 @@
-checksum_sha256: d25dab3e004fdac0428620b52f9c5fd31b217bbb60a0540a20d664845457ee24
-classes:
-  0: normal
-  1: pneumonia
-input_dtype: float32
-input_shape:
-- 1
-- 3
-- 224
-- 224
+# --- 1. Идентичность и целостность ---
+artifact_filename: pneumonia_resnet18_v1.pt
+checksum_sha256: 0d73928e78e9e4356a87a63105174a4d98cf777db3256d36c5d4d2d906877285
 model_version: resnet18
-num_classes: 1
-output: raw logit \u2014 apply sigmoid to get pneumonia probability in [0, 1]
-preprocessing_version: '1.0'
+schema_version: '1.0'
+
+# --- 2. Вход + препроцессинг ---
+input_shape: [1, 3, 224, 224]
+input_dtype: float32
 preprocessing:
-  input_format: dicom
-  intensity_scaling: min_max
-  intensity_range: [0.0, 1.0]
-  invert_monochrome1: true
-  resize: [224, 224]
-  resize_interpolation: bilinear
-  preserve_aspect_ratio: false
-  grayscale_to_rgb: replicate_channel
-  tensor_layout: CHW
-  normalization_mean: [0.485, 0.456, 0.406]
-  normalization_std: [0.229, 0.224, 0.225]
-explainability:
-  method: Grad-CAM
-  target_layer: layer4
-  computed_by: python_ml_service
-  note: Grad-CAM is not computed in C++/libtorch. The Python ML service runs inference
-    and heatmap generation together. C++ backend receives the heatmap as a PNG overlay.
+  version: '1.0'
+  resize:
+    height: 224
+    width: 224
+    interpolation: bilinear
+    keep_aspect_ratio: false
+  channel_order: RGB
+  grayscale_handling: replicate_to_3ch
+  scale:
+    divide_by: 255.0
+  normalize:
+    mean: [0.485, 0.456, 0.406]
+    std: [0.229, 0.224, 0.225]
+  op_order: [resize, grayscale_handling, scale, normalize]
+
+# --- 3. Выход ---
+outputs:
+  - index: 0
+    name: logits
+    shape: [1, 1]
+    semantics: raw_logit
+    activation: sigmoid
+  - index: 1
+    name: feature_maps
+    shape: [1, 512, 7, 7]
+    dtype: float32
+
+# --- 4. Логика решения ---
 threshold: 0.3078
+label_rule: "label=pneumonia if sigmoid(logit) >= threshold else normal"
 confidence_semantics:
-  definition: sigmoid(logit) \u2014 always the model's probability that the image shows pneumonia
+  definition: sigmoid(logit) — always the model's probability that the image shows pneumonia
   range: 0.0 to 1.0
   label_rule: label=pneumonia if confidence >= threshold, else label=normal
   examples:
@@ -46,8 +53,19 @@ confidence_semantics:
       threshold: 0.3078
       label: pneumonia
   disclaimer: confidence is model output probability, not clinical certainty
-test_accuracy: 0.8481
-test_auc: 0.8741
-sensitivity: 0.7439
-specificity: 0.8165
-val_accuracy: 0.8356
+
+# --- 5. Grad-CAM контракт ---
+gradcam:
+  target_layer: layer4
+  feature_map_shape: [1, 512, 7, 7]
+  target: single_logit
+  explains: pneumonia
+  graph_alive: true
+
+# --- 6. Метрики ---
+metrics:
+  test_accuracy: 0.8481
+  test_auc: 0.8741
+  sensitivity: 0.7439
+  specificity: 0.8165
+  val_accuracy: 0.8356
